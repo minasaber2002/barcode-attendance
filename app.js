@@ -6,6 +6,7 @@ const state = {
   isScanning: false,
   lastScan: { code: "", at: 0 },
   rows: loadRows(),
+  toastTimer: null,
 };
 
 const els = {
@@ -15,6 +16,7 @@ const els = {
   exportXlsx: document.querySelector("#export-xlsx"),
   manualCode: document.querySelector("#manual-code"),
   manualForm: document.querySelector("#manual-form"),
+  scanToast: document.querySelector("#scan-toast"),
   startScan: document.querySelector("#start-scan"),
   stopScan: document.querySelector("#stop-scan"),
   totalCount: document.querySelector("#total-count"),
@@ -135,11 +137,13 @@ function onScanSuccess(decodedText) {
 
   if (added) {
     playBeep();
-    setStatus("تم");
+    setStatus("تم الادخال");
+    showScanMessage("تم الادخال");
     return;
   }
 
-  setStatus("تم تسجيل هذا الباركود من قبل.");
+  setStatus("تم الادخال");
+  showScanMessage("تم الادخال");
 }
 
 function supportedBarcodeFormats() {
@@ -256,6 +260,18 @@ function setStatus(message) {
   els.cameraStatus.textContent = message;
 }
 
+function showScanMessage(message) {
+  els.scanToast.textContent = message;
+  els.scanToast.hidden = false;
+  els.scanToast.classList.add("is-visible");
+
+  clearTimeout(state.toastTimer);
+  state.toastTimer = setTimeout(() => {
+    els.scanToast.classList.remove("is-visible");
+    els.scanToast.hidden = true;
+  }, 1400);
+}
+
 function uniqueRows(rows) {
   const seen = new Set();
   const unique = [];
@@ -302,19 +318,26 @@ function playBeep() {
   unlockBeep();
 
   const oscillator = state.audioContext.createOscillator();
+  const secondOscillator = state.audioContext.createOscillator();
   const gain = state.audioContext.createGain();
   const now = state.audioContext.currentTime;
 
-  oscillator.type = "sine";
-  oscillator.frequency.setValueAtTime(880, now);
+  oscillator.type = "square";
+  secondOscillator.type = "sine";
+  oscillator.frequency.setValueAtTime(1200, now);
+  secondOscillator.frequency.setValueAtTime(1800, now);
   gain.gain.setValueAtTime(0.0001, now);
-  gain.gain.exponentialRampToValueAtTime(0.25, now + 0.02);
-  gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.18);
+  gain.gain.exponentialRampToValueAtTime(1, now + 0.01);
+  gain.gain.setValueAtTime(1, now + 0.18);
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.42);
 
   oscillator.connect(gain);
+  secondOscillator.connect(gain);
   gain.connect(state.audioContext.destination);
   oscillator.start(now);
-  oscillator.stop(now + 0.2);
+  secondOscillator.start(now);
+  oscillator.stop(now + 0.45);
+  secondOscillator.stop(now + 0.45);
 }
 
 function escapeHtml(value) {
