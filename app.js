@@ -1,6 +1,7 @@
 const STORAGE_KEY = "around-barcode-log";
 
 const state = {
+  audioContext: null,
   html5QrCode: null,
   isScanning: false,
   lastScan: { code: "", at: 0 },
@@ -11,7 +12,6 @@ const els = {
   barcodeList: document.querySelector("#barcode-list"),
   cameraStatus: document.querySelector("#camera-status"),
   emptyState: document.querySelector("#empty-state"),
-  exportCsv: document.querySelector("#export-csv"),
   exportXlsx: document.querySelector("#export-xlsx"),
   manualCode: document.querySelector("#manual-code"),
   manualForm: document.querySelector("#manual-form"),
@@ -25,8 +25,8 @@ render();
 els.startScan.addEventListener("click", startScanner);
 els.stopScan.addEventListener("click", stopScanner);
 els.exportXlsx.addEventListener("click", exportXlsx);
-els.exportCsv.addEventListener("click", exportCsv);
 els.manualForm.addEventListener("submit", addManualCode);
+els.manualCode.addEventListener("input", keepManualCodeNumeric);
 els.barcodeList.addEventListener("click", deleteRow);
 
 window.addEventListener("beforeunload", () => {
@@ -37,7 +37,14 @@ window.addEventListener("beforeunload", () => {
 
 function loadRows() {
   try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+    const rows = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+    const unique = uniqueRows(rows);
+
+    if (unique.length !== rows.length) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(unique));
+    }
+
+    return unique;
   } catch {
     return [];
   }
@@ -51,7 +58,6 @@ function render() {
   els.totalCount.textContent = state.rows.length;
   els.emptyState.hidden = state.rows.length > 0;
   els.exportXlsx.disabled = state.rows.length === 0;
-  els.exportCsv.disabled = state.rows.length === 0;
 
   els.barcodeList.innerHTML = state.rows
     .map((row, index) => {
@@ -59,8 +65,6 @@ function render() {
         <tr>
           <td>${index + 1}</td>
           <td class="code">${escapeHtml(row.code)}</td>
-          <td>${formatScanDate(row.createdAt)}</td>
-          <td>${formatScanTime(row.createdAt)}</td>
           <td><button class="danger delete-row" type="button" data-id="${row.id}">حذف</button></td>
         </tr>
       `;
@@ -75,6 +79,7 @@ async function startScanner() {
   }
 
   try {
+    unlockBeep();
     state.html5QrCode = state.html5QrCode || new Html5Qrcode("reader");
     await state.html5QrCode.start(
       { facingMode: "environment" },
@@ -126,8 +131,15 @@ function onScanSuccess(decodedText) {
   }
 
   state.lastScan = { code, at: now };
-  addCode(code);
-  setStatus(`تمت إضافة الباركود: ${code}`);
+  const added = addCode(code);
+
+  if (added) {
+    playBeep();
+    setStatus("تم");
+    return;
+  }
+
+  setStatus("تم تسجيل هذا الباركود من قبل.");
 }
 
 function supportedBarcodeFormats() {
@@ -156,19 +168,26 @@ function addManualCode(event) {
     return;
   }
 
-  addCode(code);
+  const added = addCode(code);
   els.manualCode.value = "";
-  setStatus(`تمت إضافة الباركود يدويًا: ${code}`);
+  setStatus(added ? "تمت الإضافة يدويًا." : "هذا الباركود موجود بالفعل.");
 }
 
 function addCode(code) {
+  const normalizedCode = code.trim();
+
+  if (state.rows.some((row) => row.code === normalizedCode)) {
+    return false;
+  }
+
   state.rows.unshift({
     id: crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`,
-    code,
+    code: normalizedCode,
     createdAt: new Date().toISOString(),
   });
   saveRows();
   render();
+  return true;
 }
 
 function deleteRow(event) {
@@ -188,7 +207,7 @@ function exportXlsx() {
   }
 
   if (!window.XLSX) {
-    setStatus("مكتبة Excel لم يتم تحميلها. استخدم CSV أو تأكد من اتصال الإنترنت.");
+    setStatus("مكتبة Excel لم يتم تحميلها. تأكد من اتصال الإنترنت وجرب تحديث الصفحة.");
     return;
   }
 
@@ -207,40 +226,6 @@ function exportXlsx() {
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, worksheet, "Barcodes");
   XLSX.writeFile(workbook, fileName("barcodes", "xlsx"));
-}
-
-function exportCsv() {
-  if (!state.rows.length) {
-    return;
-  }
-
-  const header = ["#", "Barcode", "Scan Date", "Scan Time", "Scanned At"];
-  const lines = state.rows
-    .slice()
-    .reverse()
-    .map((row, index) => [
-      index + 1,
-      row.code,
-      formatScanDate(row.createdAt),
-      formatScanTime(row.createdAt),
-      formatFullScanDate(row.createdAt),
-    ]);
-  const csv = [header, ...lines].map((line) => line.map(csvCell).join(",")).join("\n");
-  download(new Blob([`\ufeff${csv}`], { type: "text/csv;charset=utf-8" }), fileName("barcodes", "csv"));
-}
-
-function download(blob, name) {
-  const url = URL.createObjectURL(blob);
-  const anchor = document.createElement("a");
-  anchor.href = url;
-  anchor.download = name;
-  anchor.click();
-  URL.revokeObjectURL(url);
-}
-
-function csvCell(value) {
-  const text = String(value ?? "");
-  return `"${text.replaceAll('"', '""')}"`;
 }
 
 function fileName(base, extension) {
@@ -269,6 +254,67 @@ function formatFullScanDate(value) {
 
 function setStatus(message) {
   els.cameraStatus.textContent = message;
+}
+
+function uniqueRows(rows) {
+  const seen = new Set();
+  const unique = [];
+
+  for (const row of rows) {
+    const code = String(row.code || "").trim();
+
+    if (!code || seen.has(code)) {
+      continue;
+    }
+
+    seen.add(code);
+    unique.push({ ...row, code });
+  }
+
+  return unique;
+}
+
+function keepManualCodeNumeric() {
+  els.manualCode.value = els.manualCode.value.replace(/\D/g, "");
+}
+
+function unlockBeep() {
+  const AudioContext = window.AudioContext || window.webkitAudioContext;
+
+  if (!AudioContext) {
+    return;
+  }
+
+  state.audioContext = state.audioContext || new AudioContext();
+
+  if (state.audioContext.state === "suspended") {
+    state.audioContext.resume();
+  }
+}
+
+function playBeep() {
+  const AudioContext = window.AudioContext || window.webkitAudioContext;
+
+  if (!AudioContext) {
+    return;
+  }
+
+  unlockBeep();
+
+  const oscillator = state.audioContext.createOscillator();
+  const gain = state.audioContext.createGain();
+  const now = state.audioContext.currentTime;
+
+  oscillator.type = "sine";
+  oscillator.frequency.setValueAtTime(880, now);
+  gain.gain.setValueAtTime(0.0001, now);
+  gain.gain.exponentialRampToValueAtTime(0.25, now + 0.02);
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.18);
+
+  oscillator.connect(gain);
+  gain.connect(state.audioContext.destination);
+  oscillator.start(now);
+  oscillator.stop(now + 0.2);
 }
 
 function escapeHtml(value) {
