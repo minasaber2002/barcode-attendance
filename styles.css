@@ -25,6 +25,33 @@ body {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
+.scan-flash {
+  background: rgba(30, 190, 85, 0.92);
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  position: fixed;
+  z-index: 9999;
+}
+
+.scan-flash.is-visible {
+  animation: scan-flash 720ms ease-out;
+}
+
+@keyframes scan-flash {
+  0% {
+    opacity: 0;
+  }
+
+  14% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
 button,
 input {
   font: inherit;
