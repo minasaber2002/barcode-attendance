@@ -163,6 +163,10 @@ h2 {
   margin-bottom: 16px;
 }
 
+.scanner-title {
+  margin-bottom: 14px;
+}
+
 .actions {
   display: flex;
   flex-wrap: wrap;
@@ -180,6 +184,31 @@ h2 {
 
 .reader video {
   object-fit: cover;
+}
+
+.scan-toast {
+  background: #e9f7ee;
+  border: 1px solid #8fd19e;
+  border-radius: 8px;
+  color: #12642b;
+  font-size: 1.35rem;
+  font-weight: 900;
+  margin: 12px 0 0;
+  padding: 14px 16px;
+  text-align: center;
+}
+
+.scan-toast[hidden] {
+  display: none;
+}
+
+.scanner-actions {
+  justify-content: center;
+  margin-top: 14px;
+}
+
+.scanner-actions button {
+  min-width: 180px;
 }
 
 .manual-form {
