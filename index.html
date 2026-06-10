@@ -13,11 +13,7 @@
     <main class="app-shell">
       <section class="hero">
         <div>
-          <p class="eyebrow">’ملايكة</p>
-          <h1>تسجيل الحضور </h1>
-          <p class="hero-copy">
-            الحضور مثبت على هاتف الخادم وليس اون لاين يرجى ارسال الملف النهائي لجورج وحيد
-          </p>
+          <h1>تسجيل الحضور</h1>
         </div>
         <div class="stats" aria-live="polite">
           <span id="total-count">0</span>
@@ -42,7 +38,15 @@
         <form id="manual-form" class="manual-form">
           <label for="manual-code">إدخال يدوي</label>
           <div class="manual-row">
-            <input id="manual-code" name="manual-code" type="text" autocomplete="off" placeholder="اكتب الباركود هنا" />
+            <input
+              id="manual-code"
+              name="manual-code"
+              type="tel"
+              inputmode="numeric"
+              pattern="[0-9]*"
+              autocomplete="off"
+              placeholder="اكتب الباركود هنا"
+            />
             <button type="submit" class="secondary">إضافة</button>
           </div>
         </form>
@@ -56,7 +60,6 @@
           </div>
           <div class="actions">
             <button id="export-xlsx" type="button">تصدير Excel</button>
-            <button id="export-csv" type="button" class="secondary">تصدير CSV</button>
           </div>
         </div>
 
@@ -66,8 +69,6 @@
               <tr>
                 <th>#</th>
                 <th>الباركود</th>
-                <th>تاريخ الاسكان</th>
-                <th>وقت الاسكان</th>
                 <th>حذف</th>
               </tr>
             </thead>
