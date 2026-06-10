@@ -16,6 +16,7 @@ const els = {
   exportXlsx: document.querySelector("#export-xlsx"),
   manualCode: document.querySelector("#manual-code"),
   manualForm: document.querySelector("#manual-form"),
+  scanFlash: document.querySelector("#scan-flash"),
   scanToast: document.querySelector("#scan-toast"),
   startScan: document.querySelector("#start-scan"),
   stopScan: document.querySelector("#stop-scan"),
@@ -261,6 +262,7 @@ function setStatus(message) {
 }
 
 function showScanMessage(message) {
+  flashScreen();
   els.scanToast.textContent = message;
   els.scanToast.hidden = false;
   els.scanToast.classList.add("is-visible");
@@ -270,6 +272,12 @@ function showScanMessage(message) {
     els.scanToast.classList.remove("is-visible");
     els.scanToast.hidden = true;
   }, 1400);
+}
+
+function flashScreen() {
+  els.scanFlash.classList.remove("is-visible");
+  void els.scanFlash.offsetWidth;
+  els.scanFlash.classList.add("is-visible");
 }
 
 function uniqueRows(rows) {
