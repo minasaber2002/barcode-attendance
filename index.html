@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ماسح الباركود</title>
+    <link rel="stylesheet" href="./styles.css" />
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/minified/html5-qrcode.min.js" defer></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js" defer></script>
+    <script src="./app.js" defer></script>
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="hero">
+        <div>
+          <p class="eyebrow">Barcode Logger</p>
+          <h1>سجّل الباركود بالكاميرا وصدّره Excel</h1>
+          <p class="hero-copy">
+            افتح الكاميرا، وجّهها على الباركود، وكل قراءة هتتحفظ تلقائيًا بتاريخ ووقت الاسكان لحد ما تصدّر ملف الحضور.
+          </p>
+        </div>
+        <div class="stats" aria-live="polite">
+          <span id="total-count">0</span>
+          <small>باركود محفوظ</small>
+        </div>
+      </section>
+
+      <section class="scanner-panel" aria-labelledby="scanner-title">
+        <div class="panel-header">
+          <div>
+            <h2 id="scanner-title">الكاميرا</h2>
+            <p id="camera-status">اضغط تشغيل الكاميرا للبدء.</p>
+          </div>
+          <div class="actions">
+            <button id="start-scan" type="button">تشغيل الكاميرا</button>
+            <button id="stop-scan" type="button" class="secondary" disabled>إيقاف</button>
+          </div>
+        </div>
+
+        <div id="reader" class="reader" aria-label="منطقة قراءة الباركود"></div>
+
+        <form id="manual-form" class="manual-form">
+          <label for="manual-code">إدخال يدوي</label>
+          <div class="manual-row">
+            <input id="manual-code" name="manual-code" type="text" autocomplete="off" placeholder="اكتب الباركود هنا" />
+            <button type="submit" class="secondary">إضافة</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="data-panel" aria-labelledby="data-title">
+        <div class="panel-header">
+          <div>
+            <h2 id="data-title">الباركودات المحفوظة</h2>
+            <p>الداتا محفوظة على نفس الجهاز والمتصفح، وتقدر تتحكم فيها صف بصف من زر الحذف.</p>
+          </div>
+          <div class="actions">
+            <button id="export-xlsx" type="button">تصدير Excel</button>
+            <button id="export-csv" type="button" class="secondary">تصدير CSV</button>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>الباركود</th>
+                <th>تاريخ الاسكان</th>
+                <th>وقت الاسكان</th>
+                <th>حذف</th>
+              </tr>
+            </thead>
+            <tbody id="barcode-list"></tbody>
+          </table>
+          <p id="empty-state" class="empty-state">لسه مفيش باركودات محفوظة.</p>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
