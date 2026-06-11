@@ -1,5 +1,6 @@
 const STORAGE_KEY = "around-barcode-log";
 const CLEAR_ALL_CODE = "60906870";
+const WHATSAPP_PHONE = "96596024878";
 
 const state = {
   audioContext: null,
@@ -23,6 +24,7 @@ const els = {
   manualForm: document.querySelector("#manual-form"),
   scanFlash: document.querySelector("#scan-flash"),
   scanToast: document.querySelector("#scan-toast"),
+  shareWhatsapp: document.querySelector("#share-whatsapp"),
   startScan: document.querySelector("#start-scan"),
   stopScan: document.querySelector("#stop-scan"),
   totalCount: document.querySelector("#total-count"),
@@ -33,6 +35,7 @@ render();
 els.startScan.addEventListener("click", startScanner);
 els.stopScan.addEventListener("click", stopScanner);
 els.exportXlsx.addEventListener("click", exportXlsx);
+els.shareWhatsapp.addEventListener("click", shareWhatsapp);
 els.manualForm.addEventListener("submit", addManualCode);
 els.manualCode.addEventListener("input", keepManualCodeNumeric);
 els.barcodeList.addEventListener("click", deleteRow);
@@ -67,6 +70,7 @@ function render() {
   els.lastBarcode.textContent = state.lastVisibleCode || state.rows[0]?.code || "لسه مفيش باركود";
   els.emptyState.hidden = state.rows.length > 0;
   els.exportXlsx.disabled = state.rows.length === 0;
+  els.shareWhatsapp.disabled = state.rows.length === 0;
 
   els.barcodeList.innerHTML = state.rows
     .map((row, index) => {
@@ -245,15 +249,23 @@ function deleteRow(event) {
 
 function exportXlsx() {
   if (!state.rows.length) {
-    return;
+    return false;
   }
 
   if (!window.XLSX) {
     setStatus("مكتبة Excel لم يتم تحميلها. تأكد من اتصال الإنترنت وجرب تحديث الصفحة.");
-    return;
+    return false;
   }
 
-  const sheetRows = state.rows
+  const worksheet = XLSX.utils.json_to_sheet(excelRows());
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, "Barcodes");
+  XLSX.writeFile(workbook, fileName("barcodes", "xlsx"));
+  return true;
+}
+
+function excelRows() {
+  return state.rows
     .slice()
     .reverse()
     .map((row, index) => ({
@@ -263,11 +275,41 @@ function exportXlsx() {
       "Scan Time": formatScanTime(row.createdAt),
       "Scanned At": formatFullScanDate(row.createdAt),
     }));
+}
 
-  const worksheet = XLSX.utils.json_to_sheet(sheetRows);
-  const workbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(workbook, worksheet, "Barcodes");
-  XLSX.writeFile(workbook, fileName("barcodes", "xlsx"));
+function shareWhatsapp() {
+  if (!state.rows.length) {
+    return;
+  }
+
+  const exported = exportXlsx();
+  if (!exported) {
+    return;
+  }
+
+  const message = whatsappMessage();
+  const url = `https://wa.me/${WHATSAPP_PHONE}?text=${encodeURIComponent(message)}`;
+  const whatsappWindow = window.open(url, "_blank", "noopener");
+  if (!whatsappWindow) {
+    window.location.href = url;
+  }
+  setStatus("تم تصدير Excel وفتح واتساب.");
+}
+
+function whatsappMessage() {
+  const lines = state.rows
+    .slice()
+    .reverse()
+    .map((row, index) => `${index + 1}. ${row.code}`);
+
+  return [
+    "تقرير الحضور",
+    `عدد الباركودات: ${state.rows.length}`,
+    "",
+    ...lines,
+    "",
+    "تم تصدير ملف Excel من الموقع.",
+  ].join("\n");
 }
 
 function fileName(base, extension) {
