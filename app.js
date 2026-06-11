@@ -6,6 +6,7 @@ const state = {
   isScanning: false,
   lastScan: { code: "", at: 0 },
   rows: loadRows(),
+  flashTimer: null,
   toastTimer: null,
 };
 
@@ -275,9 +276,15 @@ function showScanMessage(message) {
 }
 
 function flashScreen() {
+  clearTimeout(state.flashTimer);
   els.scanFlash.classList.remove("is-visible");
-  void els.scanFlash.offsetWidth;
-  els.scanFlash.classList.add("is-visible");
+
+  requestAnimationFrame(() => {
+    els.scanFlash.classList.add("is-visible");
+    state.flashTimer = setTimeout(() => {
+      els.scanFlash.classList.remove("is-visible");
+    }, 650);
+  });
 }
 
 function uniqueRows(rows) {
