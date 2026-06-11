@@ -181,12 +181,14 @@ function addManualCode(event) {
   const code = els.manualCode.value.trim();
 
   if (!code) {
+    keepManualInputReady();
     return;
   }
 
   if (code === CLEAR_ALL_CODE) {
     clearAllRows();
     els.manualCode.value = "";
+    keepManualInputReady();
     playBeep();
     setStatus("تم مسح كل البيانات");
     showScanMessage("تم مسح كل البيانات");
@@ -196,6 +198,7 @@ function addManualCode(event) {
   const added = addCode(code);
   setLastBarcode(code);
   els.manualCode.value = "";
+  keepManualInputReady();
 
   if (added) {
     playBeep();
@@ -205,6 +208,10 @@ function addManualCode(event) {
   }
 
   setStatus("هذا الباركود موجود بالفعل.");
+}
+
+function keepManualInputReady() {
+  els.manualCode.focus({ preventScroll: true });
 }
 
 function addCode(code) {
