@@ -5,6 +5,7 @@ const state = {
   html5QrCode: null,
   isScanning: false,
   lastScan: { code: "", at: 0 },
+  lastVisibleCode: "",
   rows: loadRows(),
   flashCleanupTimer: null,
   flashTimer: null,
@@ -16,6 +17,7 @@ const els = {
   cameraStatus: document.querySelector("#camera-status"),
   emptyState: document.querySelector("#empty-state"),
   exportXlsx: document.querySelector("#export-xlsx"),
+  lastBarcode: document.querySelector("#last-barcode"),
   manualCode: document.querySelector("#manual-code"),
   manualForm: document.querySelector("#manual-form"),
   scanFlash: document.querySelector("#scan-flash"),
@@ -61,6 +63,7 @@ function saveRows() {
 
 function render() {
   els.totalCount.textContent = state.rows.length;
+  els.lastBarcode.textContent = state.lastVisibleCode || state.rows[0]?.code || "لسه مفيش باركود";
   els.emptyState.hidden = state.rows.length > 0;
   els.exportXlsx.disabled = state.rows.length === 0;
 
@@ -136,6 +139,7 @@ function onScanSuccess(decodedText) {
   }
 
   state.lastScan = { code, at: now };
+  setLastBarcode(code);
   const added = addCode(code);
 
   if (added) {
@@ -176,6 +180,7 @@ function addManualCode(event) {
   }
 
   const added = addCode(code);
+  setLastBarcode(code);
   els.manualCode.value = "";
 
   if (added) {
@@ -203,6 +208,11 @@ function addCode(code) {
   saveRows();
   render();
   return true;
+}
+
+function setLastBarcode(code) {
+  state.lastVisibleCode = code;
+  els.lastBarcode.textContent = code;
 }
 
 function deleteRow(event) {
