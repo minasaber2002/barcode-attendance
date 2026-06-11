@@ -31,25 +31,12 @@ body {
   opacity: 0;
   pointer-events: none;
   position: fixed;
+  transition: opacity 160ms ease-out;
   z-index: 9999;
 }
 
 .scan-flash.is-visible {
-  animation: scan-flash 720ms ease-out;
-}
-
-@keyframes scan-flash {
-  0% {
-    opacity: 0;
-  }
-
-  14% {
-    opacity: 1;
-  }
-
-  100% {
-    opacity: 0;
-  }
+  opacity: 1;
 }
 
 button,
