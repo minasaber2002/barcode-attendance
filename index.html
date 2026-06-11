@@ -5,39 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#f4f7fb" />
     <title>ماسح الباركود</title>
-    <link rel="stylesheet" href="./styles.css?v=20260611-2" />
+    <link rel="stylesheet" href="./styles.css?v=20260611-3" />
     <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js" defer></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js" defer></script>
-    <script src="./app.js?v=20260611-2" defer></script>
+    <script src="./app.js?v=20260611-3" defer></script>
   </head>
   <body>
     <div id="scan-flash" class="scan-flash" aria-hidden="true" hidden></div>
     <main class="app-shell">
-      <section class="hero">
-        <div>
-          <h1>تسجيل الحضور</h1>
-        </div>
-        <div class="stats" aria-live="polite">
-          <span id="total-count">0</span>
-          <small>باركود محفوظ</small>
-        </div>
+      <section class="latest-panel" aria-live="polite">
+        <small>آخر باركود</small>
+        <strong id="last-barcode">لسه مفيش باركود</strong>
+        <span><b id="total-count">0</b> باركود محفوظ</span>
       </section>
 
       <section class="scanner-panel" aria-labelledby="scanner-title">
-        <div class="scanner-title">
-          <h2 id="scanner-title">الكاميرا</h2>
-          <p id="camera-status">اضغط تشغيل الكاميرا للبدء.</p>
-        </div>
+        <h1 id="scanner-title" class="sr-only">تسجيل الحضور</h1>
+        <p id="camera-status" class="sr-only" aria-live="polite">اضغط تشغيل الكاميرا للبدء.</p>
 
-        <div id="reader" class="reader" aria-label="منطقة قراءة الباركود"></div>
-        <p id="scan-toast" class="scan-toast" aria-live="polite" hidden></p>
-
-        <div class="actions scanner-actions">
-          <button id="start-scan" type="button">تشغيل الكاميرا</button>
-          <button id="stop-scan" type="button" class="secondary" disabled>إيقاف</button>
-        </div>
-
-        <form id="manual-form" class="manual-form">
+        <form id="manual-form" class="manual-form compact">
           <label for="manual-code">إدخال يدوي</label>
           <div class="manual-row">
             <input
@@ -52,6 +38,14 @@
             <button type="submit" class="secondary">إضافة</button>
           </div>
         </form>
+
+        <div id="reader" class="reader" aria-label="منطقة قراءة الباركود"></div>
+        <p id="scan-toast" class="scan-toast" aria-live="polite" hidden></p>
+
+        <div class="actions scanner-actions">
+          <button id="start-scan" type="button">تشغيل الكاميرا</button>
+          <button id="stop-scan" type="button" class="secondary" disabled>إيقاف</button>
+        </div>
       </section>
 
       <section class="data-panel" aria-labelledby="data-title">
