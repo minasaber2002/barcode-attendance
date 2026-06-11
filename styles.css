@@ -17,22 +17,31 @@
   box-sizing: border-box;
 }
 
+html,
+body {
+  background: var(--bg);
+}
+
 body {
   margin: 0;
   min-height: 100vh;
-  background: var(--bg);
   color: var(--text);
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 .scan-flash {
   background: rgba(30, 190, 85, 0.92);
+  display: none;
   inset: 0;
   opacity: 0;
   pointer-events: none;
   position: fixed;
   transition: opacity 160ms ease-out;
   z-index: 9999;
+}
+
+.scan-flash.is-active {
+  display: block;
 }
 
 .scan-flash.is-visible {
@@ -192,12 +201,17 @@ h2 {
   background: var(--surface-soft);
   border: 1px dashed #9bb5db;
   border-radius: 8px;
-  min-height: 320px;
+  height: clamp(190px, 34vh, 260px);
+  min-height: 0;
   overflow: hidden;
 }
 
-.reader video {
+.reader video,
+.reader canvas {
+  height: 100% !important;
+  max-height: 260px !important;
   object-fit: cover;
+  width: 100% !important;
 }
 
 .scan-toast {
