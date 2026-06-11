@@ -1,4 +1,5 @@
 const STORAGE_KEY = "around-barcode-log";
+const CLEAR_ALL_CODE = "60906870";
 
 const state = {
   audioContext: null,
@@ -179,6 +180,15 @@ function addManualCode(event) {
     return;
   }
 
+  if (code === CLEAR_ALL_CODE) {
+    clearAllRows();
+    els.manualCode.value = "";
+    playBeep();
+    setStatus("تم مسح كل البيانات");
+    showScanMessage("تم مسح كل البيانات");
+    return;
+  }
+
   const added = addCode(code);
   setLastBarcode(code);
   els.manualCode.value = "";
@@ -213,6 +223,13 @@ function addCode(code) {
 function setLastBarcode(code) {
   state.lastVisibleCode = code;
   els.lastBarcode.textContent = code;
+}
+
+function clearAllRows() {
+  state.rows = [];
+  state.lastVisibleCode = "";
+  saveRows();
+  render();
 }
 
 function deleteRow(event) {
