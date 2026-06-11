@@ -6,6 +6,7 @@ const state = {
   isScanning: false,
   lastScan: { code: "", at: 0 },
   rows: loadRows(),
+  flashCleanupTimer: null,
   flashTimer: null,
   toastTimer: null,
 };
@@ -176,7 +177,15 @@ function addManualCode(event) {
 
   const added = addCode(code);
   els.manualCode.value = "";
-  setStatus(added ? "تمت الإضافة يدويًا." : "هذا الباركود موجود بالفعل.");
+
+  if (added) {
+    playBeep();
+    setStatus("تم الادخال");
+    showScanMessage("تم الادخال");
+    return;
+  }
+
+  setStatus("هذا الباركود موجود بالفعل.");
 }
 
 function addCode(code) {
@@ -276,14 +285,21 @@ function showScanMessage(message) {
 }
 
 function flashScreen() {
+  clearTimeout(state.flashCleanupTimer);
   clearTimeout(state.flashTimer);
+  els.scanFlash.hidden = false;
+  els.scanFlash.classList.add("is-active");
   els.scanFlash.classList.remove("is-visible");
 
   requestAnimationFrame(() => {
     els.scanFlash.classList.add("is-visible");
     state.flashTimer = setTimeout(() => {
       els.scanFlash.classList.remove("is-visible");
-    }, 650);
+      state.flashCleanupTimer = setTimeout(() => {
+        els.scanFlash.classList.remove("is-active");
+        els.scanFlash.hidden = true;
+      }, 220);
+    }, 520);
   });
 }
 
