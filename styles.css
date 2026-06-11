@@ -95,24 +95,7 @@ button.danger:hover {
 .app-shell {
   width: min(1120px, calc(100% - 32px));
   margin: 0 auto;
-  padding: 32px 0;
-}
-
-.hero {
-  align-items: center;
-  display: flex;
-  gap: 24px;
-  justify-content: space-between;
-  margin-bottom: 24px;
-}
-
-.eyebrow {
-  color: var(--primary);
-  font-size: 0.85rem;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  margin: 0 0 8px;
-  text-transform: uppercase;
+  padding: 14px 0 24px;
 }
 
 h1,
@@ -132,40 +115,54 @@ h2 {
   margin-bottom: 6px;
 }
 
-.hero-copy,
 .panel-header p,
 .empty-state {
   color: var(--muted);
 }
 
-.hero-copy {
-  font-size: 1.1rem;
-  line-height: 1.8;
-  max-width: 720px;
-}
-
-.stats {
-  align-items: center;
+.latest-panel {
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: 8px;
   box-shadow: var(--shadow);
-  display: grid;
-  min-width: 170px;
-  padding: 22px;
+  margin-bottom: 10px;
+  padding: 12px 14px;
   text-align: center;
 }
 
-.stats span {
-  color: var(--primary);
-  font-size: 3rem;
-  font-weight: 900;
-  line-height: 1;
+.latest-panel small,
+.latest-panel span {
+  color: var(--muted);
+  display: block;
 }
 
-.stats small {
-  color: var(--muted);
-  margin-top: 8px;
+.latest-panel strong {
+  color: var(--primary);
+  direction: ltr;
+  display: block;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: clamp(1.6rem, 8vw, 3rem);
+  font-weight: 900;
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+  padding: 3px 0;
+}
+
+.latest-panel span {
+  font-size: 0.9rem;
+}
+
+.sr-only {
+  border: 0;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
 }
 
 .scanner-panel,
@@ -174,8 +171,8 @@ h2 {
   border: 1px solid var(--line);
   border-radius: 8px;
   box-shadow: var(--shadow);
-  margin-bottom: 20px;
-  padding: 20px;
+  margin-bottom: 12px;
+  padding: 12px;
 }
 
 .panel-header {
@@ -184,10 +181,6 @@ h2 {
   gap: 16px;
   justify-content: space-between;
   margin-bottom: 16px;
-}
-
-.scanner-title {
-  margin-bottom: 14px;
 }
 
 .actions {
@@ -201,7 +194,7 @@ h2 {
   background: var(--surface-soft);
   border: 1px dashed #9bb5db;
   border-radius: 8px;
-  height: clamp(190px, 34vh, 260px);
+  height: clamp(145px, 25vh, 210px);
   min-height: 0;
   overflow: hidden;
 }
@@ -209,7 +202,7 @@ h2 {
 .reader video,
 .reader canvas {
   height: 100% !important;
-  max-height: 260px !important;
+  max-height: 210px !important;
   object-fit: cover;
   width: 100% !important;
 }
@@ -221,8 +214,8 @@ h2 {
   color: #12642b;
   font-size: 1.35rem;
   font-weight: 900;
-  margin: 12px 0 0;
-  padding: 14px 16px;
+  margin: 8px 0 0;
+  padding: 10px 12px;
   text-align: center;
 }
 
@@ -232,23 +225,21 @@ h2 {
 
 .scanner-actions {
   justify-content: center;
-  margin-top: 14px;
+  margin-top: 10px;
 }
 
 .scanner-actions button {
-  min-width: 180px;
+  min-width: 150px;
 }
 
 .manual-form {
-  border-top: 1px solid var(--line);
-  margin-top: 18px;
-  padding-top: 18px;
+  margin: 0 0 10px;
 }
 
 .manual-form label {
   display: block;
   font-weight: 800;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .manual-row {
@@ -262,7 +253,7 @@ input {
   color: var(--text);
   flex: 1;
   min-width: 0;
-  padding: 0.75rem 1rem;
+  padding: 0.65rem 0.85rem;
 }
 
 input:focus {
@@ -313,26 +304,48 @@ td.code {
 @media (max-width: 760px) {
   .app-shell {
     width: min(100% - 20px, 1120px);
-    padding: 20px 0;
+    padding: 10px 0 18px;
   }
 
-  .hero,
-  .panel-header,
-  .manual-row {
+  .panel-header {
     align-items: stretch;
     flex-direction: column;
   }
 
-  .stats {
-    min-width: 0;
+  .latest-panel {
+    margin-bottom: 8px;
+    padding: 9px 10px;
+  }
+
+  .scanner-panel,
+  .data-panel {
+    padding: 10px;
+  }
+
+  .reader {
+    height: clamp(135px, 24vh, 190px);
   }
 
   .actions {
     justify-content: stretch;
   }
 
-  .actions button,
-  .manual-row button {
+  .actions button {
     width: 100%;
+  }
+
+  .manual-row {
+    align-items: stretch;
+  }
+
+  .manual-row button,
+  .scanner-actions button {
+    flex: 1;
+    min-width: 0;
+    white-space: nowrap;
+  }
+
+  .scanner-actions button {
+    width: auto;
   }
 }
